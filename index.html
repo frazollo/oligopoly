@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Oligopoly: 2026 Euro Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Space Grotesk', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            bg: '#CDE6D0',       // Classic board green
+                            surface: '#FBF8EF',  // Classic cream
+                            ink: '#000000',      // Black text
+                            accent: '#E3000F',   // Classic red
+                            warn: '#F5821F',     // Classic orange
+                            muted: '#666666',    // Gray text
+                            money: '#008C44',    // Money green
+                            highlight: '#0072BB',// Classic dark blue
+                        },
+                        prop: {
+                            brown: '#955436',
+                            lightBlue: '#AAE0FA',
+                            pink: '#D93A96',
+                            orange: '#F7941D',
+                            red: '#ED1B24',
+                            yellow: '#FEF200',
+                            green: '#1FB25A',
+                            blue: '#0072BB'
+                        }
+                    },
+                    animation: {
+                        'shake': 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both',
+                        'bounce-slight': 'bounceSlight 1s infinite',
+                    },
+                    keyframes: {
+                        shake: {
+                            '10%, 90%': { transform: 'translate3d(-1px, 0, 0)' },
+                            '20%, 80%': { transform: 'translate3d(2px, 0, 0)' },
+                            '30%, 50%, 70%': { transform: 'translate3d(-4px, 0, 0)' },
+                            '40%, 60%': { transform: 'translate3d(4px, 0, 0)' }
+                        },
+                        bounceSlight: {
+                            '0%, 100%': { transform: 'translateY(-5%)' },
+                            '50%': { transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            background-color: #CDE6D0;
+            color: #000000;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Classic Monopoly Box */
+        .monopoly-box {
+            width: 140px;
+            height: 190px;
+            background-color: #FBF8EF;
+            color: #000000;
+            border: 2px solid #000;
+            border-radius: 0px; 
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            flex-shrink: 0;
+            position: relative;
+            box-shadow: 4px 4px 0px rgba(0,0,0,0.15);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .monopoly-box.active {
+            transform: scale(1.15) translateY(-10px);
+            box-shadow: 8px 8px 0px #E3000F;
+            border-color: #E3000F;
+            z-index: 10;
+        }
+
+        .box-header {
+            height: 25%;
+            border-bottom: 2px solid #000;
+            width: 100%;
+        }
+
+        .box-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 8px 4px;
+            text-align: center;
+        }
+
+        .box-title {
+            font-size: 0.75rem;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: -0.02em;
+        }
+
+        .box-price {
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-top: auto;
+            border-top: 2px solid #000;
+            width: 100%;
+            padding: 6px 0;
+            background-color: #FBF8EF;
+        }
+
+        /* Player Token Tracker */
+        #player-token {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 28px;
+            height: 28px;
+            background-color: #C0C0C0; /* Silver token */
+            border: 3px solid #000;
+            border-radius: 50%;
+            box-shadow: 2px 2px 0px #000;
+            z-index: 20;
+        }
+
+        #board-track {
+            padding-left: calc(50vw - 70px);
+            padding-right: calc(50vw - 70px);
+        }
+    </style>
+</head>
+<body class="flex flex-col h-[100dvh] font-sans antialiased relative selection:bg-brand-highlight selection:text-white">
+
+    <header class="h-16 flex items-center justify-center shrink-0 z-20 bg-gradient-to-b from-brand-bg to-transparent absolute top-0 w-full pointer-events-none px-4">
+        
+        <!-- OLIGOPOLY Logo Top Left -->
+        <div class="absolute top-4 left-4 pointer-events-auto transform -rotate-3 z-30">
+            <div class="bg-brand-accent text-white font-black text-xl uppercase tracking-widest border-2 border-black px-3 py-1 shadow-[2px_2px_0_#000]">
+                Oligopoly
+            </div>
+        </div>
+
+        <div id="event-toast" class="bg-prop-yellow border-2 border-black text-black text-xs font-bold px-5 py-2 rounded-none transition-opacity duration-300 opacity-0 transform translate-y-[-10px] text-center shadow-[4px_4px_0_rgba(0,0,0,0.15)] pointer-events-auto">
+            Welcome to the EU 2026 Grind.
+        </div>
+    </header>
+
+    <main class="flex-1 relative flex flex-col justify-center overflow-hidden bg-brand-bg pt-12 pb-4" id="main-area">
+        
+        <!-- Center Highlight Indicator -->
+        <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[160px] h-[210px] border-4 border-brand-highlight/30 rounded-none pointer-events-none z-0"></div>
+
+        <!-- Scrollable Track Container -->
+        <div class="w-full overflow-visible">
+            <div id="board-track" class="flex gap-4 items-center transition-transform duration-500 ease-out will-change-transform">
+                <!-- Boxes generated by JS -->
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-brand-surface rounded-t-none border-t-4 border-black p-5 shrink-0 z-20 shadow-[0_-4px_0_rgba(0,0,0,0.1)] relative">
+        
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-2 gap-4 mb-5">
+            <!-- Left: Financials -->
+            <div class="space-y-3">
+                <div>
+                    <p class="text-[10px] font-bold text-brand-muted uppercase tracking-wider">Bank Balance</p>
+                    <p id="stat-money" class="text-3xl font-black text-brand-money">€100</p>
+                </div>
+                <div>
+                    <p class="text-[10px] font-bold text-brand-muted uppercase tracking-wider">State/Student Debt</p>
+                    <p id="stat-debt" class="text-sm font-black text-brand-accent">-€20,000</p>
+                </div>
+            </div>
+            
+            <!-- Right: Personal -->
+            <div class="space-y-3 text-right">
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <p class="text-[10px] font-bold text-brand-muted uppercase tracking-wider">Mental Health</p>
+                        <p id="stat-mental-text" class="text-xs font-black text-brand-ink">100%</p>
+                    </div>
+                    <div class="w-full h-3 bg-white border-2 border-black rounded-none overflow-hidden">
+                        <div id="stat-mental-bar" class="h-full bg-brand-highlight transition-all duration-300 w-full"></div>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-[10px] font-bold text-brand-muted uppercase tracking-wider">Age <span id="stat-age" class="text-brand-ink font-black text-sm">24</span></p>
+                    <p id="stat-job" class="text-xs font-black text-brand-warn mt-1 uppercase tracking-tight">Unpaid Stage</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dice Display -->
+        <div id="dice-display" class="flex justify-center gap-3 mb-4 hidden h-10 items-center">
+            <div class="w-10 h-10 bg-white text-brand-ink border-2 border-black rounded-none flex items-center justify-center text-2xl shadow-[2px_2px_0_#000]">
+                <i id="die1" class="fa-solid fa-dice-one"></i>
+            </div>
+            <div class="w-10 h-10 bg-white text-brand-ink border-2 border-black rounded-none flex items-center justify-center text-2xl shadow-[2px_2px_0_#000]">
+                <i id="die2" class="fa-solid fa-dice-one"></i>
+            </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex gap-3">
+            <button id="btn-parents" onclick="askParents()" class="flex-1 bg-white hover:bg-gray-100 active:translate-y-[2px] active:shadow-[0_0_0_#000] border-2 border-black text-brand-ink py-3 rounded-none transition-all flex flex-col items-center justify-center relative overflow-hidden group shadow-[4px_4px_0_rgba(0,0,0,0.2)]">
+                <span class="text-[10px] font-black uppercase tracking-wider">Ask Parents</span>
+                
+                <div id="parent-cooldown-overlay" class="absolute inset-0 bg-gray-200 flex flex-col items-center justify-center hidden border-2 border-brand-accent text-brand-accent">
+                    <span class="text-[10px] uppercase font-black tracking-wider">Wait: <span id="cooldown-turns" class="font-black">0</span> turns</span>
+                </div>
+            </button>
+            
+            <button id="btn-roll" onclick="rollDice()" class="flex-[2] bg-brand-accent hover:bg-red-700 active:translate-y-[2px] active:shadow-[0_0_0_#000] text-white font-black text-xl py-3 rounded-none transition-all shadow-[4px_4px_0_rgba(0,0,0,0.2)] border-2 border-black flex items-center justify-center gap-2 uppercase tracking-wide">
+                <span>Roll Dice</span>
+                <i class="fa-solid fa-dice"></i>
+            </button>
+        </div>
+    </footer>
+
+    <!-- Intro / Welcome Modal -->
+    <div id="intro-modal-overlay" class="fixed inset-0 bg-black/80 z-[70] flex items-center justify-center p-6 backdrop-blur-md transition-opacity duration-500">
+        <div class="bg-brand-surface border-4 border-black rounded-none w-full max-w-sm shadow-[8px_8px_0_rgba(0,140,68,1)] overflow-hidden flex flex-col relative transform transition-transform">
+            <div class="bg-brand-money text-white font-black uppercase text-center py-3 border-b-4 border-black tracking-widest text-lg">
+                How to Play
+            </div>
+            <div class="p-6 flex flex-col items-center text-center space-y-4">
+                
+                <!-- OLIGOPOLY Logo Big -->
+                <div class="transform -rotate-2 mb-2 mt-2">
+                    <div class="bg-brand-accent text-white font-black text-3xl uppercase tracking-widest border-4 border-black px-4 py-2 shadow-[4px_4px_0_#000]">
+                        Oligopoly
+                    </div>
+                </div>
+
+                <h2 class="text-xl font-black text-brand-ink uppercase tracking-tight leading-none">Welcome to 2026</h2>
+                <p class="text-brand-ink text-sm font-semibold leading-relaxed">
+                    You are 24 years old. You have €100 and big student debt. You cannot buy houses. Your only goal is to survive until age 40 before your mental health drops to 0%.
+                </p>
+                <div class="text-left w-full bg-white border-2 border-black p-4 mt-2 shadow-[4px_4px_0_#000]">
+                    <ul class="text-[11px] font-bold space-y-3 text-brand-ink uppercase tracking-wide">
+                        <li class="flex items-center gap-3"><i class="fa-solid fa-dice text-brand-accent text-lg w-5 text-center"></i> Roll the dice to live your life.</li>
+                        <li class="flex items-center gap-3"><i class="fa-solid fa-house-crack text-prop-orange text-lg w-5 text-center"></i> Pay crazy rent to big landlords.</li>
+                        <li class="flex items-center gap-3"><i class="fa-solid fa-phone text-brand-highlight text-lg w-5 text-center"></i> Ask parents for money.</li>
+                        <li class="flex items-center gap-3"><i class="fa-solid fa-brain text-prop-pink text-lg w-5 text-center"></i> Keep your mental health above 0%.</li>
+                    </ul>
+                </div>
+            </div>
+            <button onclick="startGame()" class="w-full bg-brand-highlight hover:bg-blue-700 text-white font-black py-4 transition-colors uppercase tracking-widest text-sm active:bg-blue-800 border-t-4 border-black">
+                Accept Fate
+            </button>
+        </div>
+    </div>
+
+    <div id="modal-overlay" class="fixed inset-0 bg-black/60 hidden z-[60] flex items-center justify-center p-6 backdrop-blur-sm opacity-0 transition-opacity duration-300">
+        <div id="modal-box" class="bg-brand-surface border-4 border-black rounded-none w-full max-w-sm shadow-[8px_8px_0_rgba(227,0,15,1)] transform scale-95 transition-transform duration-300 overflow-hidden flex flex-col relative">
+            
+            <div class="h-4 w-full border-b-4 border-black" id="modal-color-bar"></div>
+            
+            <button onclick="closeModal()" class="absolute top-5 right-4 text-brand-muted hover:text-brand-accent transition-colors">
+                <i class="fa-solid fa-xmark text-2xl font-black"></i>
+            </button>
+            
+            <div class="p-6 flex-1 flex flex-col items-center text-center mt-2">
+                <div id="modal-icon-container" class="w-20 h-20 bg-white flex items-center justify-center border-4 border-black mb-5 shadow-[4px_4px_0_#000] relative animate-bounce-slight">
+                    <i id="modal-icon" class="fa-solid fa-circle-exclamation text-4xl text-brand-ink"></i>
+                </div>
+                
+                <h2 id="modal-title" class="text-3xl font-black text-brand-ink mb-1 uppercase tracking-tighter leading-none">Unexpected Fact</h2>
+                <h3 id="modal-subtitle" class="text-[10px] text-brand-highlight font-bold uppercase tracking-widest mb-4">Bureaucratic Notice</h3>
+                
+                <p id="modal-message" class="text-brand-ink text-sm leading-relaxed mb-6 font-semibold">Message goes here.</p>
+                
+                <div id="modal-stats-impact" class="w-full flex justify-center gap-4 mb-2 empty:hidden"></div>
+            </div>
+            
+            <button onclick="closeModal()" class="w-full bg-brand-highlight hover:bg-blue-700 text-white font-black py-4 transition-colors uppercase tracking-widest text-sm active:bg-blue-800 border-t-2 border-black">
+                Acknowledge
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- Game State ---
+        let player = {
+            position: 0,
+            money: 100,
+            debt: 20000,
+            mentalHealth: 100,
+            age: 24,
+            laps: 0,
+            inBurnout: false,
+            burnoutTurns: 0,
+            parentCooldown: 0
+        };
+
+        const jobs = [
+            { title: "Unpaid Internship", income: 0, triggerLap: 0 },
+            { title: "Food Delivery", income: 80, triggerLap: 2 },
+            { title: "Junior Assistant", income: 150, triggerLap: 4 },
+            { title: "Average Office Job", income: 300, triggerLap: 7 },
+            { title: "Middle Management", income: 500, triggerLap: 10 }
+        ];
+
+        let currentJobIndex = 0;
+        let inflationMultiplier = 1.0;
+        let gameActive = false; // Game starts locked behind intro
+        let isAnimating = false;
+        const boxWidth = 140;
+        const boxGap = 16;
+
+        // --- Board Data (Euro-centric Layout) ---
+        const boardData = [
+            { name: "WAKE UP (GO)", type: "go", text: "Collect Wage", icon: "fa-sun", color: "#E3000F" }, // 0
+            { name: "Paris Chambre de Bonne", type: "property", cost: 60, group: "prop-brown" }, // 1
+            { name: "Bureaucracy", type: "chance", icon: "fa-file-signature", color: "#F5821F" }, // 2 
+            { name: "Berlin WG", type: "property", cost: 60, group: "prop-brown" }, // 3
+            { name: "Oat Milk Surcharge", type: "tax", cost: 20, icon: "fa-seedling" }, // 4
+            { name: "SNCF/DB Strike", type: "transit", cost: 50, icon: "fa-train" }, // 5
+            { name: "London Zone 5 Box", type: "property", cost: 100, group: "prop-lightBlue" }, // 6
+            { name: "Crisis", type: "chest", icon: "fa-triangle-exclamation", color: "#0072BB" }, // 7 
+            { name: "Illegal Sublet", type: "property", cost: 100, group: "prop-lightBlue" }, // 8
+            { name: "Gentrified Kiez", type: "property", cost: 120, group: "prop-lightBlue" }, // 9
+            { name: "BURNOUT", type: "jail", text: "Just Visiting", icon: "fa-bed", color: "#666666" }, // 10
+            { name: "Lisbon Co-living", type: "property", cost: 140, group: "prop-pink" }, // 11
+            { name: "Gas Bill Surge", type: "utility", cost: 50, icon: "fa-fire-flame-simple" }, // 12
+            { name: "Amsterdam Houseboat", type: "property", cost: 140, group: "prop-pink" }, // 13
+            { name: "Milan Micro-Appt.", type: "property", cost: 160, group: "prop-pink" }, // 14
+            { name: "Ryanair Baggage", type: "transit", cost: 50, icon: "fa-plane-departure" }, // 15
+            { name: "Barcelona AirBnb", type: "property", cost: 180, group: "prop-orange" }, // 16
+            { name: "Crisis", type: "chest", icon: "fa-triangle-exclamation", color: "#0072BB" }, // 17 
+            { name: "Foreign Investor", type: "property", cost: 180, group: "prop-orange" }, // 18
+            { name: "Corporate Landlord", type: "property", cost: 200, group: "prop-orange" }, // 19
+            { name: "SIDE HUSTLE", type: "parking", text: "Sold on Vinted: +€40", icon: "fa-shirt", color: "#1FB25A" }, // 20
+            { name: "Dublin Semi-D", type: "property", cost: 220, group: "prop-red" }, // 21
+            { name: "Bureaucracy", type: "chance", icon: "fa-file-signature", color: "#F5821F" }, // 22 
+            { name: "Empty Oligarch Mansion", type: "property", cost: 220, group: "prop-red" }, // 23
+            { name: "BlackRock Rental", type: "property", cost: 240, group: "prop-red" }, // 24
+            { name: "E-Scooter Fine", type: "transit", cost: 50, icon: "fa-motorcycle" }, // 25
+            { name: "NIMBY Village", type: "property", cost: 260, group: "prop-yellow" }, // 26
+            { name: "Heating Crisis", type: "utility", cost: 50, icon: "fa-temperature-arrow-down" }, // 27
+            { name: "Swiss Tax Haven", type: "property", cost: 260, group: "prop-yellow" }, // 28
+            { name: "Monaco Penthouse", type: "property", cost: 280, group: "prop-yellow" }, // 29
+            { name: "LAYOFF", type: "gojail", text: "Go to BURNOUT", icon: "fa-person-falling", color: "#E3000F" }, // 30
+            { name: "Trust Fund Chateau", type: "property", cost: 300, group: "prop-green" }, // 31
+            { name: "Mayfair Townhouse", type: "property", cost: 300, group: "prop-green" }, // 32
+            { name: "Crisis", type: "chest", icon: "fa-triangle-exclamation", color: "#0072BB" }, // 33 
+            { name: "CEO's Villa", type: "property", cost: 320, group: "prop-green" }, // 34
+            { name: "Eurostar Ticket", type: "transit", cost: 50, icon: "fa-train-tram" }, // 35
+            { name: "Bureaucracy", type: "chance", icon: "fa-file-signature", color: "#F5821F" }, // 36
+            { name: "Far-Right Tax Hikes", type: "tax", cost: 100, icon: "fa-landmark-dome" }, // 37
+            { name: "EU Bureaucracy Tower", type: "property", cost: 350, group: "prop-blue" }, // 38
+            { name: "Bureaucratic Fine", type: "tax", cost: 200, icon: "fa-scale-unbalanced" } // 39
+        ];
+
+        const chanceCards = [
+            { title: "Inflation", text: "The landlord raised your rent. Your salary is the same. Pay €100.", money: -100, mental: -10 },
+            { title: "Return to Office", text: "You must go to the office but the metro is on strike. Walk 5km in the rain.", money: 0, mental: -20 },
+            { title: "Vinted Win", text: "You sold an old jacket on Vinted for €40. Small win!", money: 40, mental: 5 },
+            { title: "Erasmus Memories", text: "You look at old photos from Spain. Life is so much harder now.", money: 0, mental: -10 },
+            { title: "Free Tap Water", text: "The restaurant gave you free tap water! Best day ever.", money: 0, mental: 15 },
+            { title: "App Ruined", text: "A billionaire bought your favorite app. It is terrible now.", money: 0, mental: -15 },
+            { title: "Tourist Tax", text: "You went on a weekend trip, but had to pay a new city tax. Pay €30.", money: -30, mental: -5 },
+            { title: "Total Collapse", text: "Complete exhaustion. Go directly to Burnout. Do not collect your wage.", move: 10 }
+        ];
+
+        const chestCards = [
+            { title: "Healthcare Gap", text: "Dental care is not free! Pay €300 for the dentist.", money: -300, mental: -20 },
+            { title: "Parents Text", text: "'Can you pay your own Netflix? We just bought a holiday home.' Pay €150.", money: -150, mental: -15 },
+            { title: "Tax Money", text: "The government gave you some tax money back! It buys some groceries.", money: 100, mental: 10 },
+            { title: "Tikkie Culture", text: "A friend sent you a payment request for a sip of their water. Pay up.", money: -2, mental: -15 },
+            { title: "Therapy", text: "The public waiting list is 2 years. You paid for private therapy.", money: -80, mental: 30 },
+            { title: "App Subscription", text: "You forgot to cancel a free trial for a meditation app.", money: -90, mental: -10 },
+            { title: "Tax Error", text: "The tax office made a mistake and fined you. It is easier to just pay.", money: -50, mental: -15 }
+        ];
+
+        function initBoard() {
+            const track = document.getElementById('board-track');
+            track.innerHTML = '';
+            
+            const colorMap = {
+                'prop-brown': '#955436', 'prop-lightBlue': '#AAE0FA',
+                'prop-pink': '#D93A96', 'prop-orange': '#F7941D',
+                'prop-red': '#ED1B24', 'prop-yellow': '#FEF200',
+                'prop-green': '#1FB25A', 'prop-blue': '#0072BB'
+            };
+
+            for (let lap = 0; lap < 5; lap++) {
+                boardData.forEach((space, index) => {
+                    const globalIndex = lap * 40 + index;
+                    const box = document.createElement('div');
+                    box.className = 'monopoly-box';
+                    box.id = `box-${globalIndex}`;
+                    
+                    let headerHTML = '';
+                    let bodyHTML = '';
+                    let priceHTML = '';
+                    
+                    if (space.type === 'property') {
+                        const bgColor = colorMap[space.group];
+                        headerHTML = `<div class="box-header" style="background-color: ${bgColor};"></div>`;
+                        bodyHTML = `<div class="box-title mt-3">${space.name}</div>`;
+                        priceHTML = `<div class="box-price text-brand-ink">Rent €${space.cost}</div>`;
+                    } else if (space.type === 'chance' || space.type === 'chest') {
+                        bodyHTML = `
+                            <div class="box-title mt-3" style="color: ${space.color};">${space.name}</div>
+                            <i class="fa-solid ${space.icon} text-4xl mt-3" style="color: ${space.color};"></i>
+                        `;
+                    } else if (space.type === 'tax' || space.type === 'transit' || space.type === 'utility') {
+                        bodyHTML = `
+                            <div class="box-title mt-3">${space.name}</div>
+                            <i class="fa-solid ${space.icon} text-3xl mt-3 text-brand-ink"></i>
+                        `;
+                        priceHTML = `<div class="box-price text-brand-ink">Pay €${space.cost}</div>`;
+                    } else {
+                        bodyHTML = `
+                            <div class="box-title mt-4" style="color: ${space.color || '#000000'};">${space.name}</div>
+                            ${space.icon ? `<i class="fa-solid ${space.icon} text-4xl mt-4" style="color: ${space.color}"></i>` : ''}
+                            <div class="text-[10px] text-brand-ink mt-auto mb-2 font-bold uppercase tracking-wider">${space.text || ''}</div>
+                        `;
+                    }
+
+                    let tokenHTML = (globalIndex === 0) ? `<div id="player-token"></div>` : '';
+
+                    box.innerHTML = `
+                        ${headerHTML}
+                        <div class="box-body">
+                            ${bodyHTML}
+                        </div>
+                        ${priceHTML}
+                        ${tokenHTML}
+                    `;
+                    
+                    track.appendChild(box);
+                });
+            }
+            
+            updateTrackPosition(0);
+        }
+
+        function updateTrackPosition(globalIndex) {
+            const track = document.getElementById('board-track');
+            
+            const offset = -(globalIndex * (boxWidth + boxGap));
+            track.style.transform = `translateX(${offset}px)`;
+
+            document.querySelectorAll('.monopoly-box').forEach(b => b.classList.remove('active'));
+            const activeBox = document.getElementById(`box-${globalIndex}`);
+            if (activeBox) {
+                activeBox.classList.add('active');
+                const token = document.getElementById('player-token');
+                if (token) activeBox.appendChild(token);
+            }
+        }
+
+        function rollDice() {
+            if (!gameActive || isAnimating) return;
+            isAnimating = true;
+
+            const btnRoll = document.getElementById('btn-roll');
+            btnRoll.classList.add('opacity-50', 'pointer-events-none');
+
+            if (player.inBurnout) {
+                player.burnoutTurns--;
+                if (player.burnoutTurns <= 0) {
+                    player.inBurnout = false;
+                    showToast("Recovered from burnout. Back to work.");
+                } else {
+                    showToast(`Burnt out. Skipping turn (${player.burnoutTurns} left).`);
+                    animateDice(0, 0, () => {
+                        advanceTurn();
+                        btnRoll.classList.remove('opacity-50', 'pointer-events-none');
+                        isAnimating = false;
+                    });
+                    return;
+                }
+            }
+
+            const d1 = Math.floor(Math.random() * 6) + 1;
+            const d2 = Math.floor(Math.random() * 6) + 1;
+            const total = d1 + d2;
+            
+            animateDice(d1, d2, () => {
+                movePlayerStepByStep(total);
+            });
+        }
+
+        function animateDice(d1, d2, callback) {
+            const diceDisplay = document.getElementById('dice-display');
+            const icon1 = document.getElementById('die1');
+            const icon2 = document.getElementById('die2');
+            const diceMap = ['fa-dice-one', 'fa-dice-two', 'fa-dice-three', 'fa-dice-four', 'fa-dice-five', 'fa-dice-six'];
+            
+            diceDisplay.classList.remove('hidden');
+            
+            if (d1 === 0) {
+                 icon1.className = 'fa-solid fa-bed text-brand-alert';
+                 icon2.className = 'fa-solid fa-bed text-brand-alert';
+                 setTimeout(() => {
+                    diceDisplay.classList.add('hidden');
+                    callback();
+                 }, 1000);
+                 return;
+            }
+
+            let rolls = 0;
+            const interval = setInterval(() => {
+                icon1.className = `fa-solid ${diceMap[Math.floor(Math.random() * 6)]} text-brand-ink`;
+                icon2.className = `fa-solid ${diceMap[Math.floor(Math.random() * 6)]} text-brand-ink`;
+                rolls++;
+                
+                if (rolls > 10) {
+                    clearInterval(interval);
+                    icon1.className = `fa-solid ${diceMap[d1 - 1]} text-brand-accent`;
+                    icon2.className = `fa-solid ${diceMap[d2 - 1]} text-brand-accent`;
+                    diceDisplay.classList.add('animate-shake');
+                    
+                    setTimeout(() => {
+                        diceDisplay.classList.remove('animate-shake');
+                        diceDisplay.classList.add('hidden');
+                        callback();
+                    }, 800);
+                }
+            }, 50);
+        }
+
+        function movePlayerStepByStep(spaces) {
+            let stepsTaken = 0;
+            
+            const stepInterval = setInterval(() => {
+                stepsTaken++;
+                player.position++;
+                
+                let visualIndex = (player.laps * 40) + player.position;
+                
+                if (player.position >= 40) {
+                    player.position -= 40;
+                    player.laps++;
+                    handlePassGo();
+                    visualIndex = (player.laps * 40) + player.position;
+                }
+                
+                updateTrackPosition(visualIndex);
+
+                if (stepsTaken >= spaces) {
+                    clearInterval(stepInterval);
+                    setTimeout(() => {
+                        handleLanding(player.position);
+                    }, 400); 
+                }
+            }, 250); 
+        }
+
+        function handlePassGo() {
+            player.age++;
+            let wage = jobs[currentJobIndex].income;
+            player.money += wage;
+            
+            let interest = Math.floor(player.debt * 0.05);
+            player.debt += interest;
+            
+            inflationMultiplier += 0.15;
+            
+            showToast(`Age ${player.age}! Wage +€${wage}, Debt Interest -€${interest}. Inflation up.`);
+            checkJobPromotion();
+            updateUI();
+        }
+
+        function handleLanding(pos) {
+            const space = boardData[pos];
+            let amount = 0;
+            let mentalHit = 0;
+            
+            if (space.type === 'property' || space.type === 'transit' || space.type === 'utility' || space.type === 'tax') {
+                amount = Math.floor(space.cost * inflationMultiplier);
+                player.money -= amount;
+                mentalHit = space.type === 'tax' ? 5 : 2;
+                player.mentalHealth -= mentalHit;
+                
+                showToast(`Landed on ${space.name}. Paid €${amount}.`);
+                finishTurnDelay();
+                
+            } else if (space.type === 'chance') {
+                drawCard(chanceCards, "Bureaucracy (Notice)", "fa-file-signature", "#F5821F");
+            } else if (space.type === 'chest') {
+                drawCard(chestCards, "Crisis (Notice)", "fa-triangle-exclamation", "#0072BB");
+            } else if (space.type === 'gojail') {
+                goToBurnout();
+            } else if (space.type === 'parking') {
+                player.money += 40;
+                player.mentalHealth += 5;
+                showToast(`Side Hustle! Sold clothes on Vinted: +€40.`);
+                finishTurnDelay();
+            } else {
+                finishTurnDelay();
+            }
+        }
+
+        function finishTurnDelay() {
+            updateUI();
+            checkGameOver();
+            setTimeout(() => {
+                advanceTurn();
+                document.getElementById('btn-roll').classList.remove('opacity-50', 'pointer-events-none');
+                isAnimating = false;
+            }, 500);
+        }
+
+        function drawCard(deck, subtitle, iconClass, color) {
+            const card = deck[Math.floor(Math.random() * deck.length)];
+            
+            if (card.money) player.money += card.money;
+            if (card.mental) player.mentalHealth += card.mental;
+            
+            showModal(card.title, subtitle, card.text, iconClass, color, card.money, card.mental, () => {
+                if (card.move !== undefined) {
+                    player.position = card.move;
+                    updateTrackPosition((player.laps * 40) + player.position); 
+                    if (card.move === 10) {
+                        player.inBurnout = true;
+                        player.burnoutTurns = 2;
+                    }
+                }
+                finishTurnDelay();
+            });
+        }
+
+        function goToBurnout() {
+            player.position = 10;
+            player.inBurnout = true;
+            player.burnoutTurns = 2;
+            player.mentalHealth -= 20;
+            
+            updateTrackPosition((player.laps * 40) + 10);
+            
+            showModal("BURNOUT", "System Failure", "The grind broke you. Lose 2 turns and 20 Mental Health.", "fa-battery-empty", "#E3000F", 0, -20, () => {
+                finishTurnDelay();
+            });
+        }
+
+        function askParents() {
+            if (!gameActive || player.parentCooldown > 0 || isAnimating) return;
+            
+            const outcomes = [
+                { title: "Mom Sent Help", text: "Mom sends €100. 'Do not spend it all on expensive coffee.'", m: 100, mh: -5 },
+                { title: "Boomer Advice", text: "Dad says: 'When I was young, I paid for university by working.' No money.", m: 0, mh: -15 },
+                { title: "Role Reversal", text: "Energy bills are too high. They ask YOU for €50.", m: -50, mh: -20 },
+                { title: "Grandma's Card", text: "You find €20 in an old birthday card from grandma.", m: 20, mh: 10 }
+            ];
+            
+            const result = outcomes[Math.floor(Math.random() * outcomes.length)];
+            player.money += result.m;
+            player.mentalHealth += result.mh;
+            
+            player.parentCooldown = 3; 
+            
+            showModal(result.title, "Calling Parents", result.text, "fa-phone-volume", "#1FB25A", result.m, result.mh, () => {
+                updateUI();
+                checkGameOver();
+            });
+            updateUI(); 
+        }
+
+        function advanceTurn() {
+            if (player.parentCooldown > 0) player.parentCooldown--;
+            updateUI();
+        }
+
+        function checkJobPromotion() {
+            if (currentJobIndex < jobs.length - 1) {
+                const nextJob = jobs[currentJobIndex + 1];
+                if (player.laps >= nextJob.triggerLap) {
+                    currentJobIndex++;
+                    showModal("Promotion?", "Job Update", `You got a 'better' job. New Title: ${nextJob.title}. Income: €${nextJob.income}.`, "fa-briefcase", "#0072BB", 0, 10);
+                }
+            }
+        }
+
+        function updateUI() {
+            if (player.mentalHealth > 100) player.mentalHealth = 100;
+            if (player.mentalHealth < 0) player.mentalHealth = 0;
+
+            document.getElementById('stat-age').innerText = player.age;
+            document.getElementById('stat-money').innerText = `€${player.money}`;
+            document.getElementById('stat-money').className = `text-3xl font-black ${player.money < 0 ? 'text-brand-accent' : 'text-brand-money'}`;
+            document.getElementById('stat-debt').innerText = `-€${player.debt.toLocaleString()}`;
+            
+            const mentalBar = document.getElementById('stat-mental-bar');
+            mentalBar.style.width = `${player.mentalHealth}%`;
+            document.getElementById('stat-mental-text').innerText = `${player.mentalHealth}%`;
+            
+            if (player.mentalHealth < 30) mentalBar.className = 'h-full transition-all duration-300 w-full bg-brand-accent';
+            else if (player.mentalHealth < 60) mentalBar.className = 'h-full transition-all duration-300 w-full bg-brand-warn';
+            else mentalBar.className = 'h-full transition-all duration-300 w-full bg-brand-highlight';
+
+            const btnParents = document.getElementById('btn-parents');
+            const cooldownOverlay = document.getElementById('parent-cooldown-overlay');
+            if (player.parentCooldown > 0) {
+                btnParents.disabled = true;
+                cooldownOverlay.classList.remove('hidden');
+                document.getElementById('cooldown-turns').innerText = player.parentCooldown;
+            } else {
+                btnParents.disabled = false;
+                cooldownOverlay.classList.add('hidden');
+            }
+
+            document.getElementById('stat-job').innerText = jobs[currentJobIndex].title;
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('event-toast');
+            toast.innerText = msg;
+            
+            toast.classList.remove('opacity-0', 'translate-y-[-10px]');
+            toast.classList.add('opacity-100', 'translate-y-0');
+            
+            setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', 'translate-y-[-10px]');
+            }, 3000);
+        }
+
+        let modalCloseCallback = null;
+
+        function showModal(title, subtitle, message, iconClass, color, moneyChange = 0, mentalChange = 0, callback = null) {
+            modalCloseCallback = callback;
+            
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-subtitle').innerText = subtitle;
+            document.getElementById('modal-message').innerText = message;
+            
+            const icon = document.getElementById('modal-icon');
+            icon.className = `fa-solid ${iconClass} text-4xl`;
+            icon.style.color = color;
+            document.getElementById('modal-color-bar').style.backgroundColor = color;
+            document.getElementById('modal-icon-container').style.borderColor = color;
+            
+            const statsContainer = document.getElementById('modal-stats-impact');
+            statsContainer.innerHTML = '';
+            
+            if (moneyChange !== 0) {
+                statsContainer.innerHTML += `<div class="bg-white py-2 px-5 border-2 border-black text-xs font-black uppercase tracking-wider ${moneyChange > 0 ? 'text-brand-money' : 'text-brand-accent'} shadow-[2px_2px_0_#000]">
+                    ${moneyChange > 0 ? '+' : ''}€${moneyChange}
+                </div>`;
+            }
+            if (mentalChange !== 0) {
+                statsContainer.innerHTML += `<div class="bg-white py-2 px-5 border-2 border-black text-xs font-black uppercase tracking-wider ${mentalChange > 0 ? 'text-brand-highlight' : 'text-brand-accent'} shadow-[2px_2px_0_#000]">
+                    <i class="fa-solid fa-brain mr-1"></i> ${mentalChange > 0 ? '+' : ''}${mentalChange}%
+                </div>`;
+            }
+            
+            const overlay = document.getElementById('modal-overlay');
+            const box = document.getElementById('modal-box');
+            
+            overlay.classList.remove('hidden');
+            void overlay.offsetWidth; 
+            
+            overlay.classList.remove('opacity-0');
+            overlay.classList.add('opacity-100');
+            box.classList.remove('scale-95');
+            box.classList.add('scale-100');
+        }
+
+        function closeModal() {
+            const overlay = document.getElementById('modal-overlay');
+            const box = document.getElementById('modal-box');
+            
+            overlay.classList.remove('opacity-100');
+            overlay.classList.add('opacity-0');
+            box.classList.remove('scale-100');
+            box.classList.add('scale-95');
+            
+            setTimeout(() => {
+                overlay.classList.add('hidden');
+                if (modalCloseCallback) {
+                    modalCloseCallback();
+                    modalCloseCallback = null;
+                }
+            }, 300);
+        }
+
+        function checkGameOver() {
+            if (!gameActive) return;
+
+            if (player.mentalHealth <= 0) {
+                gameActive = false;
+                showModal("SYSTEM FAILURE", "Game Over", "You have 0% mental health. You could not handle the economy. You deleted social media and moved to a farm.", "fa-skull", "#E3000F");
+                document.getElementById('btn-roll').classList.add('opacity-50', 'pointer-events-none');
+            } else if (player.money <= -2000) {
+                gameActive = false;
+                showModal("BANKRUPT", "Game Over", "You reached -€2,000 in debt. The bank took your phone. Game Over.", "fa-building-columns", "#E3000F");
+                document.getElementById('btn-roll').classList.add('opacity-50', 'pointer-events-none');
+            } else if (player.age >= 40) {
+                gameActive = false;
+                showModal("SURVIVAL ACHIEVED", "You Won?", "You reached age 40! You still rent a house, you have debt, and no pension... but you are alive.", "fa-trophy", "#F5821F");
+                document.getElementById('btn-roll').classList.add('opacity-50', 'pointer-events-none');
+            }
+        }
+
+        // --- Intro Logic ---
+        function startGame() {
+            const intro = document.getElementById('intro-modal-overlay');
+            intro.classList.add('opacity-0');
+            
+            setTimeout(() => {
+                intro.classList.add('hidden');
+                gameActive = true;
+                showToast("Welcome to adult life.");
+            }, 500);
+        }
+
+        // Init
+        window.onload = function() {
+            initBoard();
+            updateUI();
+        };
+
+    </script>
+</body>
+</html>
