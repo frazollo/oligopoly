@@ -187,11 +187,11 @@
             <div class="space-y-3">
                 <div>
                     <p class="text-[10px] font-bold text-brand-muted uppercase tracking-wider">Bank Balance</p>
-                    <p id="stat-money" class="text-3xl font-black text-brand-money">€100</p>
+                    <p id="stat-money" class="text-3xl font-black text-brand-money">€1300</p>
                 </div>
                 <div>
-                    <p class="text-[10px] font-bold text-brand-muted uppercase tracking-wider">State/Student Debt</p>
-                    <p id="stat-debt" class="text-sm font-black text-brand-accent">-€20,000</p>
+                    <p class="text-[10px] font-bold text-brand-muted uppercase tracking-wider">Debt</p>
+                    <p id="stat-debt" class="text-sm font-black text-brand-accent">-€0</p>
                 </div>
             </div>
             
@@ -255,9 +255,9 @@
                     </div>
                 </div>
 
-                <h2 class="text-xl font-black text-brand-ink uppercase tracking-tight leading-none">Welcome to 2026</h2>
+                <h2 class="text-xl font-black text-brand-ink uppercase tracking-tight leading-none">Welcome to the Real World</h2>
                 <p class="text-brand-ink text-sm font-semibold leading-relaxed">
-                    You are 24 years old. You have €100 and big student debt. You cannot buy houses. Your only goal is to survive until age 40 before your mental health drops to 0%.
+                    You just finished university. You have €1,300 in savings and no debt. But finding a good job is hard. Can you survive paying rent, inflation, and unpaid internships until age 40?
                 </p>
                 <div class="text-left w-full bg-white border-2 border-black p-4 mt-2 shadow-[4px_4px_0_#000]">
                     <ul class="text-[11px] font-bold space-y-3 text-brand-ink uppercase tracking-wide">
@@ -306,8 +306,8 @@
         // --- Game State ---
         let player = {
             position: 0,
-            money: 100,
-            debt: 20000,
+            money: 1300,
+            debt: 0,
             mentalHealth: 100,
             age: 24,
             laps: 0,
@@ -317,9 +317,9 @@
         };
 
         const jobs = [
-            { title: "Unpaid Internship", income: 0, triggerLap: 0 },
-            { title: "Food Delivery", income: 80, triggerLap: 2 },
-            { title: "Junior Assistant", income: 150, triggerLap: 4 },
+            { title: "Job Seeker", income: 0, triggerLap: 0 },
+            { title: "Unpaid Internship", income: 0, triggerLap: 2 },
+            { title: "Low-Pay Commuter", income: 150, triggerLap: 4 },
             { title: "Average Office Job", income: 300, triggerLap: 7 },
             { title: "Middle Management", income: 500, triggerLap: 10 }
         ];
@@ -331,69 +331,68 @@
         const boxWidth = 140;
         const boxGap = 16;
 
-        // --- Board Data (Euro-centric Layout) ---
         const boardData = [
             { name: "WAKE UP (GO)", type: "go", text: "Collect Wage", icon: "fa-sun", color: "#E3000F" }, // 0
-            { name: "Paris Chambre de Bonne", type: "property", cost: 60, group: "prop-brown" }, // 1
+            { name: "Paris Chambre de Bonne", type: "property", cost: 60, group: "prop-brown", desc: "9 square meters. No toilet inside." }, // 1
             { name: "Bureaucracy", type: "chance", icon: "fa-file-signature", color: "#F5821F" }, // 2 
-            { name: "Berlin WG", type: "property", cost: 60, group: "prop-brown" }, // 3
-            { name: "Oat Milk Surcharge", type: "tax", cost: 20, icon: "fa-seedling" }, // 4
-            { name: "SNCF/DB Strike", type: "transit", cost: 50, icon: "fa-train" }, // 5
-            { name: "London Zone 5 Box", type: "property", cost: 100, group: "prop-lightBlue" }, // 6
+            { name: "Berlin WG", type: "property", cost: 60, group: "prop-brown", desc: "Interviewed with 30 people to live in this kitchen." }, // 3
+            { name: "Grocery Inflation", type: "tax", cost: 30, icon: "fa-basket-shopping", desc: "A single cucumber is €3 now." }, // 4
+            { name: "Monthly Metro Card", type: "transit", cost: 50, icon: "fa-ticket", desc: "The train is always late anyway." }, // 5
+            { name: "London Zone 5 Box", type: "property", cost: 100, group: "prop-lightBlue", desc: "It's a closet with a mattress." }, // 6
             { name: "Crisis", type: "chest", icon: "fa-triangle-exclamation", color: "#0072BB" }, // 7 
-            { name: "Illegal Sublet", type: "property", cost: 100, group: "prop-lightBlue" }, // 8
-            { name: "Gentrified Kiez", type: "property", cost: 120, group: "prop-lightBlue" }, // 9
+            { name: "Illegal Sublet", type: "property", cost: 100, group: "prop-lightBlue", desc: "Don't tell the real landlord you live here." }, // 8
+            { name: "Gentrified Kiez", type: "property", cost: 120, group: "prop-lightBlue", desc: "The cool bar downstairs is now a vegan soap shop." }, // 9
             { name: "BURNOUT", type: "jail", text: "Just Visiting", icon: "fa-bed", color: "#666666" }, // 10
-            { name: "Lisbon Co-living", type: "property", cost: 140, group: "prop-pink" }, // 11
-            { name: "Gas Bill Surge", type: "utility", cost: 50, icon: "fa-fire-flame-simple" }, // 12
-            { name: "Amsterdam Houseboat", type: "property", cost: 140, group: "prop-pink" }, // 13
-            { name: "Milan Micro-Appt.", type: "property", cost: 160, group: "prop-pink" }, // 14
-            { name: "Ryanair Baggage", type: "transit", cost: 50, icon: "fa-plane-departure" }, // 15
-            { name: "Barcelona AirBnb", type: "property", cost: 180, group: "prop-orange" }, // 16
+            { name: "Lisbon Co-living", type: "property", cost: 140, group: "prop-pink", desc: "Digital nomads ruined the local market." }, // 11
+            { name: "Heating Bill", type: "utility", cost: 60, icon: "fa-fire-flame-simple", desc: "Gas prices are up. Wear a sweater inside." }, // 12
+            { name: "Amsterdam Houseboat", type: "property", cost: 140, group: "prop-pink", desc: "Cold, damp, and costs a fortune." }, // 13
+            { name: "Milan Micro-Appt.", type: "property", cost: 160, group: "prop-pink", desc: "Your bed folds down into the shower." }, // 14
+            { name: "Interview Train", type: "transit", cost: 40, icon: "fa-train", desc: "Traveling 4 hours for a job that pays nothing." }, // 15
+            { name: "Barcelona AirBnb", type: "property", cost: 180, group: "prop-orange", desc: "Locals hate you, but rent is rent." }, // 16
             { name: "Crisis", type: "chest", icon: "fa-triangle-exclamation", color: "#0072BB" }, // 17 
-            { name: "Foreign Investor", type: "property", cost: 180, group: "prop-orange" }, // 18
-            { name: "Corporate Landlord", type: "property", cost: 200, group: "prop-orange" }, // 19
+            { name: "Foreign Investor", type: "property", cost: 180, group: "prop-orange", desc: "Your landlord lives in Dubai and never fixes the sink." }, // 18
+            { name: "Corporate Landlord", type: "property", cost: 200, group: "prop-orange", desc: "MegaCorp Inc. raised rent to satisfy shareholders." }, // 19
             { name: "SIDE HUSTLE", type: "parking", text: "Sold on Vinted: +€40", icon: "fa-shirt", color: "#1FB25A" }, // 20
-            { name: "Dublin Semi-D", type: "property", cost: 220, group: "prop-red" }, // 21
+            { name: "Dublin Semi-D", type: "property", cost: 220, group: "prop-red", desc: "Tech boom made this normal house unaffordable." }, // 21
             { name: "Bureaucracy", type: "chance", icon: "fa-file-signature", color: "#F5821F" }, // 22 
-            { name: "Empty Oligarch Mansion", type: "property", cost: 220, group: "prop-red" }, // 23
-            { name: "BlackRock Rental", type: "property", cost: 240, group: "prop-red" }, // 24
-            { name: "E-Scooter Fine", type: "transit", cost: 50, icon: "fa-motorcycle" }, // 25
-            { name: "NIMBY Village", type: "property", cost: 260, group: "prop-yellow" }, // 26
-            { name: "Heating Crisis", type: "utility", cost: 50, icon: "fa-temperature-arrow-down" }, // 27
-            { name: "Swiss Tax Haven", type: "property", cost: 260, group: "prop-yellow" }, // 28
-            { name: "Monaco Penthouse", type: "property", cost: 280, group: "prop-yellow" }, // 29
+            { name: "Empty Oligarch Mansion", type: "property", cost: 220, group: "prop-red", desc: "You rent the pool house. Owner is never here." }, // 23
+            { name: "BlackRock Rental", type: "property", cost: 240, group: "prop-red", desc: "Wall Street owns your bedroom now." }, // 24
+            { name: "Car Maintenance", type: "transit", cost: 80, icon: "fa-wrench", desc: "Your cheap commuter car broke down again." }, // 25
+            { name: "NIMBY Village", type: "property", cost: 260, group: "prop-yellow", desc: "No new houses built here since 1982." }, // 26
+            { name: "Private Doctor", type: "utility", cost: 100, icon: "fa-stethoscope", desc: "Public waitlist is 6 months. Pay up." }, // 27
+            { name: "Swiss Tax Haven", type: "property", cost: 260, group: "prop-yellow", desc: "You pay just to breathe the air here." }, // 28
+            { name: "Monaco Penthouse", type: "property", cost: 280, group: "prop-yellow", desc: "Wait, how did you even get in here?" }, // 29
             { name: "LAYOFF", type: "gojail", text: "Go to BURNOUT", icon: "fa-person-falling", color: "#E3000F" }, // 30
-            { name: "Trust Fund Chateau", type: "property", cost: 300, group: "prop-green" }, // 31
-            { name: "Mayfair Townhouse", type: "property", cost: 300, group: "prop-green" }, // 32
+            { name: "Trust Fund Chateau", type: "property", cost: 300, group: "prop-green", desc: "Renting from a 22-year-old whose dad bought it." }, // 31
+            { name: "Mayfair Townhouse", type: "property", cost: 300, group: "prop-green", desc: "Historical charm, historically high rent." }, // 32
             { name: "Crisis", type: "chest", icon: "fa-triangle-exclamation", color: "#0072BB" }, // 33 
-            { name: "CEO's Villa", type: "property", cost: 320, group: "prop-green" }, // 34
-            { name: "Eurostar Ticket", type: "transit", cost: 50, icon: "fa-train-tram" }, // 35
+            { name: "CEO's Villa", type: "property", cost: 320, group: "prop-green", desc: "Your boss's boss's boss owns this." }, // 34
+            { name: "Family Visit Flight", type: "transit", cost: 120, icon: "fa-plane", desc: "Ryanair charged €50 just for your backpack." }, // 35
             { name: "Bureaucracy", type: "chance", icon: "fa-file-signature", color: "#F5821F" }, // 36
-            { name: "Far-Right Tax Hikes", type: "tax", cost: 100, icon: "fa-landmark-dome" }, // 37
-            { name: "EU Bureaucracy Tower", type: "property", cost: 350, group: "prop-blue" }, // 38
-            { name: "Bureaucratic Fine", type: "tax", cost: 200, icon: "fa-scale-unbalanced" } // 39
+            { name: "Work Drinks", type: "tax", cost: 30, icon: "fa-beer-mug-empty", desc: "Networking over overpriced IPAs." }, // 37
+            { name: "EU Bureaucracy Tower", type: "property", cost: 350, group: "prop-blue", desc: "Lobbyists pushed the rent to the moon." }, // 38
+            { name: "Colleague Gift", type: "tax", cost: 20, icon: "fa-gift", desc: "Steve is leaving. Give €20 for his card." } // 39
         ];
 
         const chanceCards = [
-            { title: "Inflation", text: "The landlord raised your rent. Your salary is the same. Pay €100.", money: -100, mental: -10 },
-            { title: "Return to Office", text: "You must go to the office but the metro is on strike. Walk 5km in the rain.", money: 0, mental: -20 },
+            { title: "Interview Travel", text: "You have a job interview in another city. Buy a train ticket. Pay €60.", money: -60, mental: -5 },
+            { title: "Internship Clothes", text: "You got an unpaid internship! You need nice office clothes. Pay €120.", money: -120, mental: 5 },
+            { title: "Work Drinks", text: "You must go to after-work drinks to 'network'. A beer is €8. Pay €24.", money: -24, mental: -10 },
+            { title: "Need a Car", text: "You got a low-pay job far away. You must buy a cheap car. Add €2,000 to your Debt.", money: 0, mental: -15, addDebt: 2000 },
+            { title: "Family Visit", text: "You miss your family. You buy a flight to visit them. Pay €150, but feel better.", money: -150, mental: 20 },
+            { title: "Grocery Inflation", text: "Basic food is so expensive now. A normal grocery trip costs way more. Pay €50.", money: -50, mental: -10 },
             { title: "Vinted Win", text: "You sold an old jacket on Vinted for €40. Small win!", money: 40, mental: 5 },
-            { title: "Erasmus Memories", text: "You look at old photos from Spain. Life is so much harder now.", money: 0, mental: -10 },
-            { title: "Free Tap Water", text: "The restaurant gave you free tap water! Best day ever.", money: 0, mental: 15 },
-            { title: "App Ruined", text: "A billionaire bought your favorite app. It is terrible now.", money: 0, mental: -15 },
-            { title: "Tourist Tax", text: "You went on a weekend trip, but had to pay a new city tax. Pay €30.", money: -30, mental: -5 },
             { title: "Total Collapse", text: "Complete exhaustion. Go directly to Burnout. Do not collect your wage.", move: 10 }
         ];
 
         const chestCards = [
-            { title: "Healthcare Gap", text: "Dental care is not free! Pay €300 for the dentist.", money: -300, mental: -20 },
-            { title: "Parents Text", text: "'Can you pay your own Netflix? We just bought a holiday home.' Pay €150.", money: -150, mental: -15 },
-            { title: "Tax Money", text: "The government gave you some tax money back! It buys some groceries.", money: 100, mental: 10 },
-            { title: "Tikkie Culture", text: "A friend sent you a payment request for a sip of their water. Pay up.", money: -2, mental: -15 },
-            { title: "Therapy", text: "The public waiting list is 2 years. You paid for private therapy.", money: -80, mental: 30 },
-            { title: "App Subscription", text: "You forgot to cancel a free trial for a meditation app.", money: -90, mental: -10 },
-            { title: "Tax Error", text: "The tax office made a mistake and fined you. It is easier to just pay.", money: -50, mental: -15 }
+            { title: "Private Doctor", text: "You need a medical check-up but the public wait is 6 months. Go private. Pay €150.", money: -150, mental: 10 },
+            { title: "Airbnb Eviction", text: "Your landlord is kicking you out to make an Airbnb. Pay €200 to move.", money: -200, mental: -20 },
+            { title: "Birthday Party", text: "A friend invited you to their birthday. You must buy a gift. Pay €40.", money: -40, mental: 5 },
+            { title: "Leaving Gift", text: "A colleague is leaving. Everyone must give money for their gift. Pay €20.", money: -20, mental: -5 },
+            { title: "Heating Cost", text: "Heating prices increased! Your landlord raised the rent to cover it. Pay €80.", money: -80, mental: -10 },
+            { title: "Parents Text", text: "'Can you pay your own Netflix? We just bought a holiday home.' Pay €15.", money: -15, mental: -5 },
+            { title: "Tax Return", text: "The government gave you a small tax return! Buy some groceries.", money: 100, mental: 10 }
         ];
 
         function initBoard() {
@@ -421,7 +420,10 @@
                     if (space.type === 'property') {
                         const bgColor = colorMap[space.group];
                         headerHTML = `<div class="box-header" style="background-color: ${bgColor};"></div>`;
-                        bodyHTML = `<div class="box-title mt-3">${space.name}</div>`;
+                        bodyHTML = `
+                            <div class="box-title mt-2">${space.name}</div>
+                            ${space.desc ? `<div class="text-[8px] text-brand-muted leading-tight px-1 font-semibold mt-1">${space.desc}</div>` : ''}
+                        `;
                         priceHTML = `<div class="box-price text-brand-ink">Rent €${space.cost}</div>`;
                     } else if (space.type === 'chance' || space.type === 'chest') {
                         bodyHTML = `
@@ -430,8 +432,9 @@
                         `;
                     } else if (space.type === 'tax' || space.type === 'transit' || space.type === 'utility') {
                         bodyHTML = `
-                            <div class="box-title mt-3">${space.name}</div>
-                            <i class="fa-solid ${space.icon} text-3xl mt-3 text-brand-ink"></i>
+                            <div class="box-title mt-2">${space.name}</div>
+                            ${space.desc ? `<div class="text-[8px] text-brand-muted leading-tight px-1 font-semibold mt-1">${space.desc}</div>` : ''}
+                            <i class="fa-solid ${space.icon} text-2xl mt-auto mb-1 text-brand-ink"></i>
                         `;
                         priceHTML = `<div class="box-price text-brand-ink">Pay €${space.cost}</div>`;
                     } else {
@@ -599,8 +602,20 @@
                 mentalHit = space.type === 'tax' ? 5 : 2;
                 player.mentalHealth -= mentalHit;
                 
-                showToast(`Landed on ${space.name}. Paid €${amount}.`);
-                finishTurnDelay();
+                let title = space.type === 'property' ? "Rent Due" : "Bill to Pay";
+                let icon = space.type === 'property' ? "fa-house-crack" : (space.icon || "fa-money-bill-wave");
+                let color = space.type === 'property' ? "#ED1B24" : "#000000";
+                
+                let msg = space.desc ? space.desc : `You must pay to survive.`;
+                if (inflationMultiplier > 1.0 && space.type === 'property') {
+                     msg += `\n(Rent is inflated by ${(inflationMultiplier).toFixed(2)}x)`;
+                } else if (inflationMultiplier > 1.0) {
+                     msg += `\n(Price is inflated by ${(inflationMultiplier).toFixed(2)}x)`;
+                }
+                
+                showModal(title, space.name, msg, icon, color, -amount, -mentalHit, () => {
+                    finishTurnDelay();
+                });
                 
             } else if (space.type === 'chance') {
                 drawCard(chanceCards, "Bureaucracy (Notice)", "fa-file-signature", "#F5821F");
@@ -633,6 +648,7 @@
             
             if (card.money) player.money += card.money;
             if (card.mental) player.mentalHealth += card.mental;
+            if (card.addDebt) player.debt += card.addDebt;
             
             showModal(card.title, subtitle, card.text, iconClass, color, card.money, card.mental, () => {
                 if (card.move !== undefined) {
