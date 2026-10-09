@@ -214,11 +214,11 @@
         </div>
 
         <!-- Dice Display -->
-        <div id="dice-display" class="flex justify-center gap-3 mb-4 hidden h-10 items-center">
-            <div class="w-10 h-10 bg-white text-brand-ink border-2 border-black rounded-none flex items-center justify-center text-2xl shadow-[2px_2px_0_#000]">
+        <div id="dice-display" class="flex justify-center gap-4 mb-4 hidden h-16 items-center">
+            <div class="w-14 h-14 bg-white text-brand-ink border-2 border-black rounded-none flex items-center justify-center text-4xl shadow-[4px_4px_0_#000]">
                 <i id="die1" class="fa-solid fa-dice-one"></i>
             </div>
-            <div class="w-10 h-10 bg-white text-brand-ink border-2 border-black rounded-none flex items-center justify-center text-2xl shadow-[2px_2px_0_#000]">
+            <div class="w-14 h-14 bg-white text-brand-ink border-2 border-black rounded-none flex items-center justify-center text-4xl shadow-[4px_4px_0_#000]">
                 <i id="die2" class="fa-solid fa-dice-one"></i>
             </div>
         </div>
@@ -255,22 +255,34 @@
                     </div>
                 </div>
 
-                <h2 class="text-xl font-black text-brand-ink uppercase tracking-tight leading-none">Welcome to the Real World</h2>
-                <p class="text-brand-ink text-sm font-semibold leading-relaxed">
-                    You just finished university. You have €1,300 in savings and no debt. But finding a good job is hard. Can you survive paying rent, inflation, and unpaid internships until age 40?
-                </p>
-                <div class="text-left w-full bg-white border-2 border-black p-4 mt-2 shadow-[4px_4px_0_#000]">
-                    <ul class="text-[11px] font-bold space-y-3 text-brand-ink uppercase tracking-wide">
-                        <li class="flex items-center gap-3"><i class="fa-solid fa-dice text-brand-accent text-lg w-5 text-center"></i> Roll the dice to live your life.</li>
-                        <li class="flex items-center gap-3"><i class="fa-solid fa-house-crack text-prop-orange text-lg w-5 text-center"></i> Pay crazy rent to big landlords.</li>
-                        <li class="flex items-center gap-3"><i class="fa-solid fa-phone text-brand-highlight text-lg w-5 text-center"></i> Ask parents for money.</li>
-                        <li class="flex items-center gap-3"><i class="fa-solid fa-brain text-prop-pink text-lg w-5 text-center"></i> Keep your mental health above 0%.</li>
-                    </ul>
+                <!-- Page 1 -->
+                <div id="intro-step-1" class="w-full flex flex-col items-center transition-all duration-300">
+                    <h2 class="text-xl font-black text-brand-ink uppercase tracking-tight leading-none mb-4">Welcome to the Real World</h2>
+                    <p class="text-brand-ink text-sm font-semibold leading-relaxed mb-6">
+                        You just finished university. You have €1,300 in savings and no debt. But finding a good job is hard. Can you survive paying rent, inflation, and unpaid internships until age 40?
+                    </p>
+                    <button onclick="nextIntroStep()" class="w-full bg-brand-highlight hover:bg-blue-700 text-white font-black py-4 transition-colors uppercase tracking-widest text-sm active:bg-blue-800 border-2 border-black shadow-[4px_4px_0_#000]">
+                        Next <i class="fa-solid fa-arrow-right ml-2"></i>
+                    </button>
                 </div>
+
+                <!-- Page 2 -->
+                <div id="intro-step-2" class="w-full hidden flex-col items-center transition-all duration-300">
+                    <h2 class="text-xl font-black text-brand-ink uppercase tracking-tight leading-none mb-4">How to Survive</h2>
+                    <div class="text-left w-full bg-white border-2 border-black p-4 shadow-[4px_4px_0_#000] mb-6">
+                        <ul class="text-[11px] font-bold space-y-3 text-brand-ink uppercase tracking-wide">
+                            <li class="flex items-center gap-3"><i class="fa-solid fa-dice text-brand-accent text-xl w-6 text-center"></i> Roll dice to live.</li>
+                            <li class="flex items-center gap-3"><i class="fa-solid fa-house-crack text-prop-orange text-xl w-6 text-center"></i> Pay crazy rent.</li>
+                            <li class="flex items-center gap-3"><i class="fa-solid fa-phone text-brand-highlight text-xl w-6 text-center"></i> Ask parents for help.</li>
+                            <li class="flex items-center gap-3"><i class="fa-solid fa-brain text-prop-pink text-xl w-6 text-center"></i> Keep mental health > 0%.</li>
+                        </ul>
+                    </div>
+                    <button onclick="startGame()" class="w-full bg-brand-accent hover:bg-red-700 text-white font-black py-4 transition-colors uppercase tracking-widest text-sm active:bg-red-800 border-2 border-black shadow-[4px_4px_0_#000]">
+                        Accept Fate
+                    </button>
+                </div>
+
             </div>
-            <button onclick="startGame()" class="w-full bg-brand-highlight hover:bg-blue-700 text-white font-black py-4 transition-colors uppercase tracking-widest text-sm active:bg-blue-800 border-t-4 border-black">
-                Accept Fate
-            </button>
         </div>
     </div>
 
@@ -299,6 +311,25 @@
             <button onclick="closeModal()" class="w-full bg-brand-highlight hover:bg-blue-700 text-white font-black py-4 transition-colors uppercase tracking-widest text-sm active:bg-blue-800 border-t-2 border-black">
                 Acknowledge
             </button>
+        </div>
+    </div>
+
+    <!-- Tutorial Overlay -->
+    <div id="tutorial-overlay" class="fixed inset-0 z-[45] pointer-events-none hidden transition-opacity duration-300">
+        <!-- Pointer to Token -->
+        <div class="absolute left-1/2 top-[35%] -translate-x-1/2 flex flex-col items-center animate-bounce drop-shadow-lg">
+            <div class="bg-brand-ink text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 border-2 border-white shadow-[2px_2px_0_#000] mb-2 rounded-none">
+                This is you
+            </div>
+            <i class="fa-solid fa-arrow-down text-brand-ink text-3xl drop-shadow-[0_2px_2px_rgba(255,255,255,1)]"></i>
+        </div>
+
+        <!-- Pointer to Roll Button -->
+        <div class="absolute bottom-[85px] right-8 flex flex-col items-center animate-bounce drop-shadow-lg">
+            <div class="bg-brand-accent text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 border-2 border-white shadow-[2px_2px_0_#000] mb-2 rounded-none">
+                Tap to roll
+            </div>
+            <i class="fa-solid fa-arrow-down text-brand-accent text-3xl drop-shadow-[0_2px_2px_rgba(255,255,255,1)]"></i>
         </div>
     </div>
 
@@ -481,6 +512,13 @@
         function rollDice() {
             if (!gameActive || isAnimating) return;
             isAnimating = true;
+
+            // Hide tutorial on first roll
+            const tutorial = document.getElementById('tutorial-overlay');
+            if (tutorial && !tutorial.classList.contains('hidden')) {
+                tutorial.classList.add('opacity-0');
+                setTimeout(() => tutorial.classList.add('hidden'), 300);
+            }
 
             const btnRoll = document.getElementById('btn-roll');
             btnRoll.classList.add('opacity-50', 'pointer-events-none');
@@ -836,6 +874,15 @@
         }
 
         // --- Intro Logic ---
+        function nextIntroStep() {
+            const step1 = document.getElementById('intro-step-1');
+            const step2 = document.getElementById('intro-step-2');
+            
+            step1.classList.add('hidden');
+            step2.classList.remove('hidden');
+            step2.classList.add('flex');
+        }
+
         function startGame() {
             const intro = document.getElementById('intro-modal-overlay');
             intro.classList.add('opacity-0');
@@ -843,6 +890,11 @@
             setTimeout(() => {
                 intro.classList.add('hidden');
                 gameActive = true;
+                
+                // Show tutorial arrows
+                const tutorial = document.getElementById('tutorial-overlay');
+                tutorial.classList.remove('hidden');
+                
                 showToast("Welcome to adult life.");
             }, 500);
         }
